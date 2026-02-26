@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام تحميل السيارات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a2b4a;
+  --accent: #f59e0b;
+  --accent2: #10b981;
+  --danger: #ef4444;
+  --surface: #0f172a;
+  --card: #1e293b;
+  --card2: #162032;
+  --border: rgba(255,255,255,0.08);
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --glow: rgba(245,158,11,0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  background-image: 
+    radial-gradient(ellipse at 20% 0%, rgba(245,158,11,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(16,185,129,0.06) 0%, transparent 50%);
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #0f172a 0%, #1a2b4a 50%, #0f172a 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 20px rgba(245,158,11,0.4);
+  animation: pulse-logo 3s ease-in-out infinite;
+}
+
+@keyframes pulse-logo {
+  0%, 100% { box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+  50% { box-shadow: 0 0 35px rgba(245,158,11,0.7); }
+}
+
+.logo-text h1 {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.logo-text p {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.header-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.hstat {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 70px;
+}
+
+.hstat-val {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.hstat-lbl {
+  font-size: 10px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  color: #0f172a;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5); }
+
+.btn-success {
+  background: linear-gradient(135deg, var(--accent2), #059669);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+.btn-success:hover { transform: translateY(-2px); }
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+  color: white;
+}
+.btn-danger:hover { transform: translateY(-2px); }
+
+.btn-ghost {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+.btn-sm { padding: 7px 12px; font-size: 12px; }
+
+/* MAIN */
+.main { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+/* STATS ROW */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-2px); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 60px; height: 60px;
+  border-radius: 0 16px 0 60px;
+  opacity: 0.15;
+}
+
+.stat-card.total::before { background: var(--accent); }
+.stat-card.active::before { background: #3b82f6; }
+.stat-card.done::before { background: var(--accent2); }
+.stat-card.avg::before { background: #a855f7; }
+
+.stat-icon {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.stat-val {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-card.total .stat-val { color: var(--accent); }
+.stat-card.active .stat-val { color: #3b82f6; }
+.stat-card.done .stat-val { color: var(--accent2); }
+.stat-card.avg .stat-val { color: #a855f7; }
+
+.stat-lbl {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbar-right { margin-right: auto; }
+
+/* ADD FORM */
+.add-form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 20px;
+  display: none;
+  animation: slideDown 0.3s ease;
+}
+
+.add-form.open { display: block; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  border-color: var(--accent);
+  background: rgba(245,158,11,0.05);
+}
+
+.form-group input::placeholder { color: var(--text2); opacity: 0.6; }
+
+.barcode-btn {
+  background: rgba(245,158,11,0.15);
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.barcode-btn:hover { background: rgba(245,158,11,0.25); }
+
+/* CARS GRID */
+.cars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+/* CAR CARD */
+.car-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  animation: cardIn 0.4s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.car-card:hover { border-color: rgba(245,158,11,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+
+.car-card.active {
+  border-color: rgba(59,130,246,0.3);
+  background: linear-gradient(135deg, var(--card) 0%, rgba(59,130,246,0.05) 100%);
+}
+
+.car-card.active::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  animation: shimmer 2s infinite;
+}
+
+.car-card.done {
+  border-color: rgba(16,185,129,0.3);
+  background: linear-gradient(135deg, var(--card) 0%, rgba(16,185,129,0.05) 100%);
+  opacity: 0.85;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.car-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.car-plate {
+  background: linear-gradient(135deg, var(--primary), #1e3a5f);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 3px;
+  box-shadow: 0 0 15px rgba(245,158,11,0.2);
+}
+
+.car-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.car-status.active { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+.car-status.done { background: rgba(16,185,129,0.15); color: var(--accent2); border: 1px solid rgba(16,185,129,0.3); }
+
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  animation: blink 1.5s infinite;
+}
+
+.active .status-dot { background: #3b82f6; }
+.done .status-dot { background: var(--accent2); animation: none; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.car-info {
+  margin-bottom: 14px;
+}
+
+.car-driver {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.car-note {
+  font-size: 12px;
+  color: var(--text2);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* TIMER */
+.timer-display {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.timer-val {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+
+.car-card.active .timer-val { color: #3b82f6; }
+.car-card.done .timer-val { color: var(--accent2); }
+
+.timer-lbl {
+  font-size: 11px;
+  color: var(--text2);
+  text-align: center;
+}
+
+/* ALERT BADGE */
+.alert-badge {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 700;
+  display: none;
+  animation: pulse-danger 1s infinite;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.car-card .alert-badge.show { display: inline-flex; align-items: center; gap: 4px; }
+
+/* PROGRESS */
+.progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  transition: width 1s linear;
+}
+
+/* CAR ACTIONS */
+.car-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text2);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.empty-state p { font-size: 14px; opacity: 0.5; }
+
+/* REPORTS MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.modal-close {
+  background: rgba(255,255,255,0.06);
+  border: none;
+  color: var(--text2);
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+.modal-body { padding: 24px; }
+
+.report-text {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: 'Cairo', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text);
+  margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* SETTINGS PANEL */
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.setting-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.toggle {
+  width: 44px; height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+input[type=checkbox]:checked + .toggle { background: var(--accent2); }
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; right: 3px;
+  transition: right 0.3s;
+}
+
+input[type=checkbox]:checked + .toggle::after { right: calc(100% - 21px); }
+
+input[type=checkbox] { display: none; }
+
+/* NOTIFICATION */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 250px;
+  justify-content: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(16,185,129,0.4); color: var(--accent2); }
+.toast.info { border-color: rgba(59,130,246,0.4); color: #3b82f6; }
+.toast.warning { border-color: rgba(245,158,11,0.4); color: var(--accent); }
+
+/* SCANNER */
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scanner-overlay.open { display: flex; }
+
+.scanner-box {
+  width: 280px;
+  height: 220px;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  top: 0;
+  animation: scan 2s linear infinite;
+  box-shadow: 0 0 10px var(--accent);
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+#video-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  .header-stats { display: none; }
+  .cars-grid { grid-template-columns: 1fr; }
+  .settings-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .header-actions .btn span { display: none; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* HISTORY TABLE */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.history-table th {
+  background: rgba(255,255,255,0.05);
+  padding: 10px 12px;
+  text-align: right;
+  color: var(--text2);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.history-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* FILTER TABS */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.filter-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  transition: all 0.2s;
+  border: none;
+  background: transparent;
+  font-family: 'Cairo', sans-serif;
+}
+
+.filter-tab.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* CLOUD SYNC INDICATOR */
+.sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text2);
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.sync-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent2);
+  animation: blink 2s infinite;
+}
+
+/* SECTION TITLE */
+.section-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🚛</div>
+      <div class="logo-text">
+        <h1>نظام التحميل</h1>
+        <p>Car Loading System v2.0</p>
+         <p>created by: Mohamed Nassar</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">
+        <div class="hstat-val" id="h-total">0</div>
+        <div class="hstat-lbl">الإجمالي</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" id="h-active">0</div>
+        <div class="hstat-lbl">نشط</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" id="h-done">0</div>
+        <div class="hstat-lbl">مكتمل</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="sync-indicator" title="حفظ محلي">
+        <span class="sync-dot"></span>
+        محفوظ
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="openModal('report')">📊 <span>تقرير</span></button>
+      <button class="btn btn-primary" onclick="toggleAddForm()">➕ <span>إضافة سيارة</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card total">
+      <div class="stat-icon">🚗</div>
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-lbl">إجمالي السيارات</div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val" id="stat-active">0</div>
+      <div class="stat-lbl">قيد التحميل</div>
+    </div>
+    <div class="stat-card done">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val" id="stat-done">0</div>
+      <div class="stat-lbl">مكتملة</div>
+    </div>
+    <div class="stat-card avg">
+      <div class="stat-icon">⏱️</div>
+      <div class="stat-val" id="stat-avg">--:--</div>
+      <div class="stat-lbl">متوسط وقت التحميل</div>
+    </div>
+  </div>
+
+  <!-- ADD FORM -->
+  <div class="add-form" id="addForm">
+    <div class="form-title">🚛 إضافة سيارة للتحميل</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>رقم اللوحة *</label>
+        <input type="text" id="inp-plate" placeholder="مثال: ABC-1234" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>اسم السائق</label>
+        <input type="text" id="inp-driver" placeholder="اسم السائق (اختياري)">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات</label>
+        <input type="text" id="inp-note" placeholder="ملاحظات إضافية...">
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; margin-bottom:14px;">
+      <button class="barcode-btn" onclick="openScanner()" style="flex:0 0 auto; width:auto; padding:10px 20px;">
+        📷 مسح الباركود
+      </button>
+      <div class="form-group" style="flex:1; margin:0;">
+        <input type="text" id="inp-plate" placeholder="أو اكتب رقم اللوحة يدوياً..." readonly style="display:none">
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-success" onclick="addCar()">🚀 بدء التحميل</button>
+      <button class="btn btn-ghost" onclick="toggleAddForm()">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="setFilter('all', this)">الكل</button>
+    <button class="filter-tab" onclick="setFilter('active', this)">⏳ نشط</button>
+    <button class="filter-tab" onclick="setFilter('done', this)">✅ مكتمل</button>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="section-title">السيارات النشطة</div>
+    <div class="toolbar-right" style="display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 تصدير CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearDone()">🗑️ حذف المكتملة</button>
+    </div>
+  </div>
+
+  <!-- CARS GRID -->
+  <div class="cars-grid" id="carsGrid">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🚛</div>
+      <h3>لا توجد سيارات حالياً</h3>
+      <p>اضغط على "إضافة سيارة" لبدء التحميل</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📊 تقرير التحميل</h3>
+      <button class="modal-close" onclick="closeModal('report')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="report-text" id="reportText"></div>
+      <div class="modal-actions">
+        <button class="btn btn-success btn-sm" onclick="sendWhatsApp()">📱 واتساب</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyReport()">📋 نسخ</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER OVERLAY -->
+<div class="scanner-overlay" id="scanner">
+  <div style="text-align:center; color:white; margin-bottom:10px; font-size:16px; font-weight:800;">
+    📷 وجّه الكاميرا نحو الباركود
+  </div>
+  <div class="scanner-box">
+    <video id="video-preview" autoplay playsinline></video>
+    <div class="scanner-line"></div>
+  </div>
+  <div style="display:flex; gap:10px; margin-top:10px;">
+    <button class="btn btn-primary" onclick="captureBarcode()">التقاط</button>
+    <button class="btn btn-ghost" onclick="closeScanner()">إلغاء</button>
+  </div>
+  <div id="scan-result" style="color:var(--accent); font-weight:800; font-size:18px; margin-top:10px;"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== DATA =====================
+let cars = JSON.parse(localStorage.getItem('carsData') || '[]');
+let filter = 'all';
+let alertThreshold = parseInt(localStorage.getItem('alertThreshold') || '30'); // minutes
+let intervalMap = {};
+
+// ===================== UTILS =====================
+function save() {
+  localStorage.setItem('carsData', JSON.stringify(cars));
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function getElapsed(car) {
+  if (!car.startTime) return 0;
+  const end = car.endTime || Date.now();
+  return Math.floor((end - car.startTime) / 1000);
+}
+
+function getID() {
+  return Date.now() + Math.random().toString(36).slice(2);
+}
+
+// ===================== CARS =====================
+function addCar() {
+  const plate = document.getElementById('inp-plate').value.trim().toUpperCase();
+  const driver = document.getElementById('inp-driver').value.trim();
+  const note = document.getElementById('inp-note').value.trim();
+
+  if (!plate) { showToast('⚠️ أدخل رقم اللوحة', 'warning'); return; }
+  if (cars.find(c => c.plate === plate && c.status === 'active')) {
+    showToast('⚠️ هذه اللوحة نشطة بالفعل!', 'warning'); return;
+  }
+
+  const car = {
+    id: getID(),
+    plate,
+    driver: driver || 'غير محدد',
+    note: note || '',
+    status: 'active',
+    startTime: Date.now(),
+    endTime: null,
+    alertSent: false
+  };
+
+  cars.push(car);
+  save();
+  render();
+  startTimer(car.id);
+
+  document.getElementById('inp-plate').value = '';
+  document.getElementById('inp-driver').value = '';
+  document.getElementById('inp-note').value = '';
+  toggleAddForm();
+
+  showToast(`✅ تم إضافة ${plate} للتحميل`);
+
+  // Notification permission
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function finishCar(id) {
+  const car = cars.find(c => c.id === id);
+  if (!car || car.status !== 'active') return;
+  car.status = 'done';
+  car.endTime = Date.now();
+  save();
+  clearInterval(intervalMap[id]);
+  render();
+  showToast(`✅ تم إنهاء تحميل ${car.plate}`);
+}
+
+function deleteCar(id) {
+  if (!confirm('هل تريد حذف هذه السيارة؟')) return;
+  clearInterval(intervalMap[id]);
+  cars = cars.filter(c => c.id !== id);
+  save();
+  render();
+  showToast('🗑️ تم الحذف', 'info');
+}
+
+function clearDone() {
+  const count = cars.filter(c => c.status === 'done').length;
+  if (!count) { showToast('لا توجد سيارات مكتملة', 'info'); return; }
+  if (!confirm(`حذف ${count} سيارات مكتملة؟`)) return;
+  cars = cars.filter(c => c.status !== 'done');
+  save();
+  render();
+  showToast('🗑️ تم حذف المكتملة', 'info');
+}
+
+function startTimer(id) {
+  clearInterval(intervalMap[id]);
+  intervalMap[id] = setInterval(() => {
+    const el = document.getElementById(`timer-${id}`);
+    const car = cars.find(c => c.id === id);
+    if (!car || car.status !== 'active') { clearInterval(intervalMap[id]); return; }
+    const elapsed = getElapsed(car);
+    if (el) el.textContent = formatTime(elapsed);
+
+    // Alert check
+    const elapsedMin = Math.floor(elapsed / 60);
+    if (!car.alertSent && elapsedMin >= alertThreshold) {
+      car.alertSent = true;
+      save();
+      // Show badge
+      const badge = document.getElementById(`alert-${id}`);
+      if (badge) badge.classList.add('show');
+      // Push notification
+      if (Notification.permission === 'granted') {
+        new Notification('⚠️ تنبيه تحميل', {
+          body: `السيارة ${car.plate} تجاوزت ${alertThreshold} دقيقة في التحميل!`,
+          icon: '🚛'
+        });
+      }
+      showToast(`⚠️ ${car.plate} تجاوزت ${alertThreshold} دقيقة!`, 'warning');
+    }
+
+    // Update progress bar
+    const progress = document.getElementById(`progress-${id}`);
+    if (progress) {
+      const pct = Math.min((elapsedMin / alertThreshold) * 100, 100);
+      progress.style.width = pct + '%';
+      if (pct >= 100) progress.style.background = 'linear-gradient(90deg, #ef4444, #f97316)';
+    }
+  }, 1000);
+}
+
+function restartTimers() {
+  cars.filter(c => c.status === 'active').forEach(c => startTimer(c.id));
+}
+
+// ===================== FILTER =====================
+function setFilter(f, el) {
+  filter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  render();
+}
+
+// ===================== RENDER =====================
+function render() {
+  const filtered = filter === 'all' ? cars : cars.filter(c => c.status === filter);
+  const grid = document.getElementById('carsGrid');
+  const empty = document.getElementById('emptyState');
+
+  // Stats
+  const total = cars.length;
+  const active = cars.filter(c => c.status === 'active').length;
+  const done = cars.filter(c => c.status === 'done').length;
+
+  ['total','active','done','h-total','h-active','h-done'].forEach(id => {
+    const el = document.getElementById(id) || document.getElementById(`stat-${id}`);
+  });
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('h-total').textContent = total;
+  document.getElementById('h-active').textContent = active;
+  document.getElementById('h-done').textContent = done;
+
+  // Avg time
+  const doneCars = cars.filter(c => c.status === 'done' && c.endTime);
+  if (doneCars.length) {
+    const avgSec = Math.floor(doneCars.reduce((s, c) => s + getElapsed(c), 0) / doneCars.length);
+    document.getElementById('stat-avg').textContent = formatTime(avgSec);
+  } else {
+    document.getElementById('stat-avg').textContent = '--:--';
+  }
+
+  // Empty
+  if (!filtered.length) {
+    empty.style.display = 'block';
+    // Remove car cards
+    document.querySelectorAll('.car-card').forEach(el => el.remove());
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Remove old cards
+  document.querySelectorAll('.car-card').forEach(el => el.remove());
+
+  // Add cards
+  filtered.forEach(car => {
+    const elapsed = getElapsed(car);
+    const elapsedMin = Math.floor(elapsed / 60);
+    const pct = Math.min((elapsedMin / alertThreshold) * 100, 100);
+    const overLimit = car.alertSent;
+
+    const card = document.createElement('div');
+    card.className = `car-card ${car.status}`;
+    card.id = `card-${car.id}`;
+    card.innerHTML = `
+      <div class="car-header">
+        <div class="car-plate">${car.plate}</div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <div class="car-status ${car.status}">
+            <span class="status-dot"></span>
+            ${car.status === 'active' ? 'جاري التحميل' : 'مكتمل ✓'}
+          </div>
+          <span class="alert-badge ${overLimit ? 'show' : ''}" id="alert-${car.id}">⚠️ تجاوز الحد</span>
+        </div>
+      </div>
+      <div class="car-info">
+        ${car.driver !== 'غير محدد' ? `<div class="car-driver">👤 ${car.driver}</div>` : ''}
+        ${car.note ? `<div class="car-note">📝 ${car.note}</div>` : ''}
+        <div class="car-driver" style="margin-top:4px;">⏰ بدء: ${new Date(car.startTime).toLocaleTimeString('ar')}</div>
+        ${car.endTime ? `<div class="car-driver">🏁 انتهاء: ${new Date(car.endTime).toLocaleTimeString('ar')}</div>` : ''}
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-${car.id}" style="width:${pct}%; ${pct>=100?'background:linear-gradient(90deg,#ef4444,#f97316)':''}"></div>
+      </div>
+      <div class="timer-display">
+        <div>
+          <div class="timer-val" id="timer-${car.id}">${formatTime(elapsed)}</div>
+          <div class="timer-lbl">وقت التحميل</div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:11px; color:var(--text2);">الحد: ${alertThreshold} دقيقة</div>
+          <div style="font-size:13px; font-weight:800; color:${pct>=100?'var(--danger)':'var(--accent)'};">${Math.floor(pct)}%</div>
+        </div>
+      </div>
+      <div class="car-actions">
+        ${car.status === 'active' ? `<button class="btn btn-success btn-sm" onclick="finishCar('${car.id}')">✅ إنهاء التحميل</button>` : `<button class="btn btn-ghost btn-sm" disabled>مكتمل</button>`}
+        <button class="btn btn-ghost btn-sm" onclick="deleteCar('${car.id}')">🗑️</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ===================== FORM =====================
+function toggleAddForm() {
+  const form = document.getElementById('addForm');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('inp-plate').focus();
+  }
+}
+
+// ===================== REPORT =====================
+function generateReport() {
+  const now = new Date().toLocaleString('ar');
+  const total = cars.length;
+  const active = cars.filter(c => c.status === 'active').length;
+  const done = cars.filter(c => c.status === 'done').length;
+  const doneCars = cars.filter(c => c.status === 'done' && c.endTime);
+  const avgSec = doneCars.length ? Math.floor(doneCars.reduce((s,c) => s + getElapsed(c), 0) / doneCars.length) : 0;
+
+  let report = `═══════════════════════════════\n`;
+  report += `🚛 تقرير نظام التحميل\n`;
+  report += `📅 ${now}\n`;
+  report += `═══════════════════════════════\n\n`;
+  report += `📊 الإحصائيات:\n`;
+  report += `• إجمالي السيارات: ${total}\n`;
+  report += `• قيد التحميل: ${active}\n`;
+  report += `• مكتملة: ${done}\n`;
+  if (doneCars.length) report += `• متوسط وقت التحميل: ${formatTime(avgSec)}\n`;
+  report += `\n`;
+
+  if (cars.length) {
+    report += `📋 تفاصيل السيارات:\n`;
+    report += `─────────────────────────────\n`;
+    cars.forEach((car, i) => {
+      report += `${i+1}. 🚗 ${car.plate}\n`;
+      if (car.driver !== 'غير محدد') report += `   👤 السائق: ${car.driver}\n`;
+      report += `   ⏱️ الوقت: ${formatTime(getElapsed(car))}\n`;
+      report += `   📌 الحالة: ${car.status === 'active' ? 'جاري التحميل ⏳' : 'مكتمل ✅'}\n`;
+      if (car.note) report += `   📝 ${car.note}\n`;
+      report += `\n`;
+    });
+  }
+
+  report += `═══════════════════════════════\n`;
+  report += `🔧 نظام تحميل السيارات v2.0`;
+  report += `محمد نصار`	;
+  return report;
+}
+
+function openModal(type) {
+  if (type === 'report') {
+    document.getElementById('reportText').textContent = generateReport();
+  }
+  document.getElementById(`modal-${type}`).classList.add('open');
+}
+
+function closeModal(type) {
+  document.getElementById(`modal-${type}`).classList.remove('open');
+}
+
+function sendWhatsApp() {
+  const text = encodeURIComponent(generateReport());
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function copyReport() {
+  navigator.clipboard.writeText(generateReport()).then(() => {
+    showToast('📋 تم نسخ التقرير');
+  });
+}
+
+// ===================== CSV =====================
+function exportCSV() {
+  const header = 'رقم اللوحة,السائق,الحالة,وقت البدء,وقت الانتهاء,المدة (ثانية),الملاحظات\n';
+  const rows = cars.map(c => [
+    c.plate,
+    c.driver,
+    c.status === 'active' ? 'نشط' : 'مكتمل',
+    new Date(c.startTime).toLocaleString('ar'),
+    c.endTime ? new Date(c.endTime).toLocaleString('ar') : '',
+    getElapsed(c),
+    c.note
+  ].map(v => `"${v}"`).join(',')).join('\n');
+
+  const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `loading-report-${new Date().toLocaleDateString('ar').replace(/\//g,'-')}.csv`;
+  a.click();
+  showToast('📥 تم تصدير البيانات بنجاح');
+}
+
+// ===================== SCANNER =====================
+let videoStream = null;
+
+function openScanner() {
+  document.getElementById('scanner').classList.add('open');
+  document.getElementById('scan-result').textContent = '';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      videoStream = stream;
+      document.getElementById('video-preview').srcObject = stream;
+    })
+    .catch(err => {
+      showToast('⚠️ تعذر الوصول للكاميرا', 'warning');
+      closeScanner();
+    });
+}
+
+function closeScanner() {
+  document.getElementById('scanner').classList.remove('open');
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+    videoStream = null;
+  }
+}
+
+function captureBarcode() {
+  // Simulate barcode read - in production use a barcode library
+  const plates = ['ABC-1234', 'XYZ-5678', 'AAA-999', 'BBB-1122'];
+  const fake = plates[Math.floor(Math.random() * plates.length)];
+  document.getElementById('scan-result').textContent = `✅ تم قراءة: ${fake}`;
+  setTimeout(() => {
+    document.getElementById('inp-plate').value = fake;
+    closeScanner();
+    document.getElementById('addForm').classList.add('open');
+    showToast(`📷 تم مسح اللوحة: ${fake}`);
+  }, 800);
+}
+
+// ===================== KEYBOARD =====================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    closeScanner();
+  }
+  if (e.ctrlKey && e.key === 'n') { e.preventDefault(); toggleAddForm(); }
+});
+
+// ===================== END OF DAY ALERT =====================
+function checkEndOfDay() {
+  const now = new Date();
+  if (now.getHours() === 17 && now.getMinutes() === 0) {
+    const active = cars.filter(c => c.status === 'active').length;
+    if (active > 0 && Notification.permission === 'granted') {
+      new Notification('🔔 تنبيه نهاية اليوم', {
+        body: `لا تزال ${active} سيارة قيد التحميل. هل تريد مراجعة التقرير؟`
+      });
+    }
+  }
+}
+
+setInterval(checkEndOfDay, 60000);
+
+// ===================== DEMO DATA =====================
+function loadDemo() {
+  if (cars.length === 0) {
+    // Add 2 demo cars
+    const d1 = {
+      id: getID(), plate: 'ABC-1234', driver: 'أحمد محمد',
+      note: 'شحن أثاث', status: 'active',
+      startTime: Date.now() - 12 * 60 * 1000, endTime: null, alertSent: false
+    };
+    const d2 = {
+      id: getID(), plate: 'XYZ-9900', driver: 'محمد علي',
+      note: 'مواد غذائية', status: 'done',
+      startTime: Date.now() - 45 * 60 * 1000,
+      endTime: Date.now() - 5 * 60 * 1000, alertSent: false
+    };
+    cars.push(d1, d2);
+    save();
+  }
+}
+
+// ===================== INIT =====================
+loadDemo();
+render();
+restartTimers();
+</script>
+</body>
+</html>
